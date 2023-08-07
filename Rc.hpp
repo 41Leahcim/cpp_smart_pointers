@@ -3,46 +3,66 @@
 #include <iostream>
 
 template<class T>
+class __Rc__{
+private:
+    T val;
+    size_t count;
+public:
+    __Rc__() : val(), count(1){}
+
+    __Rc__(T&& value) : val(value), count(1){}
+
+    template<class ... Args>
+    __Rc__(Args... args) : val(args...), count(1){}
+
+    void operator++(){ count++; }
+
+    void operator--(){ count--; }
+
+    size_t Count() const { return count; }
+
+    T* Value(){ return &val; }
+};
+
+template<class T>
 class Rc{
 private:
-    T *val;
-    size_t *count;
+    __Rc__<T> *counter;
 public:
-    Rc() : val(new T), count(new size_t(1)) {
+    Rc() : counter(new __Rc__<T>) {
         std::cout << "Allocated memory, default constructor\n";
     }
 
-    Rc(T&& value) : val(new T(value)), count(new size_t(1)) {
+    Rc(T&& value) : counter(new __Rc__<T>(value)) {
         std::cout << "Allocated memory, moved value\n";
     }
 
     template<class... Args>
-    Rc(Args... args) : val(new T(args...)), count(new size_t(1)) {
+    Rc(Args... args) : counter(new __Rc__<T>(args...)) {
         std::cout << "Allocated memory, with arguments\n";
     }
 
-    Rc(Rc& other) : val(other.val), count(other.count) {
+    Rc(Rc& other) : counter(other.counter) {
         std::cout << "Added a reference\n";
-        (*count)++;
+        ++(*counter);
     }
 
     Rc(Rc&& other) = delete;
 
     ~Rc() {
         std::cout << "\nDestructor called\n";
-        (*count)--;
-        if(*count == 0) {
+        --(*counter);
+        if(counter->Count() == 0) {
             std::cout << "Freed memory\n";
-            delete val;
-            delete count;
+            delete counter;
         }
     }
 
     T* operator->() {
-        return val;
+        return counter->Value();
     }
 
     T& operator*() {
-        return *val;
+        return *counter->Value();
     }
 };
