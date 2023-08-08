@@ -1,7 +1,5 @@
 #pragma once
 
-#include <iostream>
-
 template<class T>
 class __Rc__{
 private:
@@ -30,30 +28,24 @@ private:
     __Rc__<T> *counter;
 public:
     Rc() : counter(new __Rc__<T>) {
-        std::cout << "Allocated memory, default constructor\n";
     }
 
     Rc(T&& value) : counter(new __Rc__<T>(value)) {
-        std::cout << "Allocated memory, moved value\n";
     }
 
     template<class... Args>
     Rc(Args... args) : counter(new __Rc__<T>(args...)) {
-        std::cout << "Allocated memory, with arguments\n";
     }
 
     Rc(Rc& other) : counter(other.counter) {
-        std::cout << "Added a reference\n";
         ++(*counter);
     }
 
     Rc(Rc&& other) = delete;
 
     ~Rc() {
-        std::cout << "\nDestructor called\n";
         --(*counter);
         if(counter->Count() == 0) {
-            std::cout << "Freed memory\n";
             delete counter;
         }
     }
