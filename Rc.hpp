@@ -1,10 +1,12 @@
 #pragma once
 
+#include <atomic>
+
 template<class T>
 class __Rc__{
 private:
     T val;
-    size_t count;
+    std::atomic_size_t count;
 public:
     __Rc__() : val(), count(1){}
 
